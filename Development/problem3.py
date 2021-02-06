@@ -2,25 +2,21 @@ from functools import reduce
 from typing import List
 
 
-def count_slope_tree(grid: List[str], right_step: int, bottom_step: int) -> int:
-    counter = 0
-    row, col = 0, 0  # Start point
+def count_slope_tree(grid: List[str], right_step: int, bottom_step: int, row: int, col: int) -> int:
+    if row >= len(grid):
+        return 0
 
-    while row < len(grid):
-        if col >= len(grid[row]):
-            col -= len(grid[row])
+    if col >= len(grid[row]):
+        col -= len(grid[row])
 
-        if grid[row][col] == "#":
-            counter += 1
+    is_tree = 1 if grid[row][col] == "#" else 0
 
-        row += bottom_step
-        col += right_step
-
-    return counter
+    return is_tree + count_slope_tree(grid, right_step, bottom_step, row+bottom_step, col+right_step)
 
 
 def slope_statistics(grid, *args):
-    return [count_slope_tree(grid, right_step, bottom_step) for right_step, bottom_step in args]
+    # Start point 0, 0
+    return [count_slope_tree(grid, right_step, bottom_step, 0, 0) for right_step, bottom_step in args]
 
 
 def problem3():
