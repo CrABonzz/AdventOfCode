@@ -25,8 +25,7 @@ def sumThree(values: List[int], target: int) -> tuple[int, int, int]:
 
 
 def problem1():
-    with open(r".\assets\p1_input.txt",
-              'r')as file_input:
+    with open(r".\assets\p1_input.txt", 'r')as file_input:
         file_data = file_input.read()
         values = [int(val) for val in file_data.strip().split("\n")]
 
