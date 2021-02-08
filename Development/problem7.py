@@ -1,45 +1,64 @@
-def parse_line(rule):
-    # Example of rule: drab gold bags contain 2 posh aqua bags, 3 dark olive bags.
-    [container, bags] = rule.split(" bags contain ")
+def parse_rules(rules_lines):
+    rules = {}
+    amount = {}
 
-    bags = [bag[2:bag.index(" bag")] for bag in (bags.strip()[:-1].split(", "))]
+    for rule in rules_lines:
+        rule = rule.strip(".").split(" contain ")
+        bag = rule[0][:-(4 if rule[0][-1] == "g" else 5)]  # bag or bags
 
-    return container, bags
+        if rule[1] == "no other bags":
+            rules[bag] = []
+            amount[bag] = []
+        else:
+            inside_bags = [inside_bags.split() for inside_bags in rule[1].split(", ")]
+
+            # Parse inside bags line
+            rules[bag] = [" ".join(inside_bag[1:3]) for inside_bag in inside_bags]
+            amount[bag] = [int(inside_bag[0]) for inside_bag in inside_bags]
+    return rules, amount
 
 
-def can_contain(rules):
-    can_be_in = {}
+def can_contain(rules: dict, rule, bag, cache):
+    if rule in cache:
+        return cache[rule]
+    if bag in rules[rule]:
+        cache[rule] = True
+    else:
+        cache[rule] = any(can_contain(rules, b, bag, cache) for b in rules[rule])
+    return cache[rule]
 
-    for rule in rules:
-        container, bags = parse_line(rule)
 
-        for bag in bags:
-            if bag in can_be_in:
-                can_be_in[bag].append(container)
-            else:
-                can_be_in[bag] = [container]
+def can_contain_recursive(rules: dict) -> int:
+    cache = {}
+    print("Can contain:", sum([can_contain(rules, rule, "shiny gold", cache) for rule in rules]))
 
-    shiny_gold_container = set()
-    shiny_gold_container.update(can_be_in["shiny gold"])
-    new_containers = shiny_gold_container
 
-    while 0 != len(new_containers):
-        temp_new_contatins = set()
-        for bag in new_containers:
-            try:
-                temp_new_contatins.update(can_be_in[bag])
-            except KeyError:
-                pass
+def count_bags(rules: dict, amount: dict, bag, included_bags):
+    if bag in included_bags:
+        return included_bags[bag]
 
-        new_containers = temp_new_contatins
+    if len(rules[bag]) == 0:
+        included_bags[bag] = 0
+        return 0
 
-        shiny_gold_container.update(new_containers)
+    included_bags[bag] = sum([amount[bag][in_bag_index] * (count_bags(rules, amount, rules[bag][in_bag_index], included_bags) + 1)
+                              for in_bag_index, _ in enumerate(rules[bag])])
+    return included_bags[bag]
 
-    print(len(shiny_gold_container))
+
+def bags_required(rules: dict, amount: dict) -> int:
+    included_bags = {}
+    print("Required bags: ", count_bags(rules, amount, "shiny gold", included_bags))
 
 
 def problem7():
-    with open(r'assets\p7_input.txt', 'r') as file_input:
+    with open(r"assets\p7_input.txt", 'r') as file_input:
         rules = file_input.readlines()
 
-        can_contain(rules)
+    rules, amount = parse_rules([rule.strip() for rule in rules])
+
+    # Part 1
+    can_contain_recursive(rules)
+
+    # Part 2
+    bags_required(rules, amount)
