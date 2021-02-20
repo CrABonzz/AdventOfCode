@@ -5,6 +5,7 @@ from problem4 import problem4
 from problem5 import problem5
 from problem6 import problem6
 from problem7 import problem7
+from problem8 import problem8
 
 if __name__ == "__main__":
-    problem7()
+    problem8()
