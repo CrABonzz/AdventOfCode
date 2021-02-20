@@ -33,6 +33,7 @@ def find_contiguious_set(numbers, target_value):
 
         set_length += 1
 
+
 def problem9():
     with open(r"assets\p9_input.txt", 'r')as file_input:
         numbers = file_input.readlines()
